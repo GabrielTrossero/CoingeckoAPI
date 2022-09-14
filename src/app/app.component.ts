@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { CoinsService } from './coins.service';
 
 @Component({
   selector: 'app-root',
@@ -12,11 +13,15 @@ export class AppComponent implements OnInit {
   titles: string[];
   searchText: string;
 
-  constructor(private httpClient: HttpClient) {
+  constructor(
+    private httpClient: HttpClient,
+    private coinsService: CoinsService
+  ) {
     this.titles = ['#', 'Coin', 'Price', 'Price Change', '24h volume'];
   }
 
-  ngOnInit(): void {
+  //forma "antigua", sin usar servicios
+  ngOnInitV1(): void {
     this.httpClient
       .get<any[]>(
         'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false'
@@ -28,6 +33,17 @@ export class AppComponent implements OnInit {
         },
         (err) => console.log(err)
       );
+  }
+
+  //forma correcta, usando servicios
+  ngOnInit(): void {
+    this.coinsService
+      .getAll()
+      .then((response) => {
+        this.coins = response;
+        this.filterCoins = response;
+      })
+      .catch((error) => console.log(error));
   }
 
   onChange() {
